@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#171A1F">
+<title>MisPapeles</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="papeles-192.png">
+<style>
+:root{--bg:#171A1F;--card:#1F242C;--line:#303742;--ink:#ECEFF3;--muted:#98A2B0;--acc:#46BFA9;--acc-ink:#062A24;--warn:#E8A33D;--bad:#F07A6E}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.wrap{max-width:620px;margin:0 auto;padding:16px 16px 110px}
+.brand{font-weight:700;font-size:1.25rem}.brand span{color:var(--acc)}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.hbtns{display:flex;gap:8px}
+.pill{background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:6px 12px;font:inherit;font-size:.85rem;cursor:pointer}
+.loginCard{max-width:400px;margin:12vh auto 0;padding:0 18px}
+.sub{color:var(--muted);margin:6px 0 20px}
+.field{margin-bottom:14px}
+label{display:block;color:var(--muted);font-size:.88rem;margin-bottom:6px}
+input,select,textarea{width:100%;background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:12px 13px;font:inherit;min-height:48px}
+textarea{min-height:70px;resize:vertical}
+.error{color:var(--bad);min-height:1.3em;margin:6px 0 10px}
+.submit{width:100%;background:var(--acc);color:var(--acc-ink);border:0;border-radius:8px;padding:14px;font:inherit;font-weight:700;cursor:pointer}
+.submit:disabled{opacity:.6}
+.search{margin-bottom:12px}
+.alerts{margin-bottom:14px}
+.alerts h2,.grp h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 8px;display:flex;justify-content:space-between;gap:8px}
+.alerts h2{color:var(--warn)}
+.grp h2 span{font-weight:400;text-transform:none;letter-spacing:0;overflow-wrap:anywhere;text-align:right}
+.seg{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:4px;margin-bottom:6px}
+.seg button{flex:1;border:0;background:none;color:var(--muted);padding:9px;border-radius:7px;font:inherit;font-weight:600;cursor:pointer}
+.seg button.on{background:var(--acc);color:var(--acc-ink)}
+.item{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 13px;margin-bottom:8px;color:var(--ink);font:inherit;cursor:pointer}
+.item .n{font-weight:600;overflow-wrap:anywhere}
+.item .m{color:var(--muted);font-size:.87rem;margin-top:3px;overflow-wrap:anywhere}
+.item .m b{color:var(--ink);font-weight:500}
+.badge{font-size:.78rem;font-weight:700;border-radius:6px;padding:2px 8px;white-space:nowrap;border:1px solid var(--line);color:var(--muted)}
+.badge.warn{color:var(--warn);border-color:currentColor}
+.badge.bad{background:var(--bad);color:#2A0A06;border-color:transparent}
+.empty{color:var(--muted);text-align:center;padding:26px 10px}
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:5;border:0;background:var(--acc);color:var(--acc-ink);font:inherit;font-weight:700;font-size:1.05rem;border-radius:999px;padding:14px 26px;box-shadow:0 6px 20px rgba(0,0,0,.45);cursor:pointer}
+dialog{border:0;border-radius:16px 16px 0 0;background:var(--card);color:var(--ink);padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));width:100%;max-width:620px;max-height:92vh;overflow:auto;margin:auto auto 0}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+dialog h2{margin:0 0 12px;font-size:1.15rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.actions .submit{flex:1 1 100%}
+.btn{flex:1;border:1px solid var(--line);background:none;color:var(--ink);border-radius:8px;padding:12px;font:inherit;font-weight:600;cursor:pointer;text-align:center;text-decoration:none}
+.btn.bad{color:var(--bad)}
+.hint{color:var(--muted);font-size:.82rem;margin-top:-8px;margin-bottom:12px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(14px + env(safe-area-inset-top,0px));background:var(--acc);color:var(--acc-ink);padding:11px 16px;border-radius:10px;font-weight:700;max-width:min(92vw,480px);z-index:10;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+</style>
+</head>
+<body>
+
+<div id="loginView" hidden>
+  <div class="loginCard">
+    <div class="brand">Mis<span>Papeles</span></div>
+    <p class="sub">Entra con tu cuenta de MiContable.</p>
+    <div class="field"><label for="lEmail">Correo</label><input type="email" id="lEmail" autocomplete="username"></div>
+    <div class="field"><label for="lPass">Contraseña</label><input type="password" id="lPass" autocomplete="current-password"></div>
+    <div class="error" id="lError"></div>
+    <button class="submit" type="button" id="lBtn">Entrar</button>
+  </div>
+</div>
+
+<div class="wrap" id="appView" hidden>
+  <header>
+    <div class="brand">Mis<span>Papeles</span></div>
+    <div class="hbtns"><button class="pill" id="expBtn" type="button">Exportar</button><button class="pill" id="outBtn" type="button">Salir</button></div>
+  </header>
+  <input class="search" id="q" type="search" placeholder="Buscar papel, carpeta, etiqueta…">
+  <section class="alerts" id="alerts"></section>
+  <div class="seg" role="group" aria-label="Agrupar">
+    <button type="button" data-v="carpeta" class="on">Por carpeta</button>
+    <button type="button" data-v="etiqueta">Por etiqueta</button>
+    <button type="button" data-v="todo">Todos</button>
+  </div>
+  <div id="list"><p class="empty">Cargando…</p></div>
+</div>
+
+<button class="fab" id="fab" type="button" hidden>+ Añadir papel</button>
+
+<dialog id="sheet">
+  <h2 id="sTitle">Nuevo papel</h2>
+  <div class="field"><label for="fNombre">Documento</label><input type="text" id="fNombre" placeholder="Permiso de conducir, escritura del piso…" autocomplete="off"></div>
+  <div class="field"><label for="fCat">Categoría</label>
+    <select id="fCat">
+      <option>Personal</option><option>Vehículo y taxi</option><option>Casa</option><option>Salud</option>
+      <option>Banco y seguros</option><option>Impuestos y trabajo</option><option>Otros</option>
+    </select></div>
+  <div class="grid2">
+    <div class="field"><label for="fCarpeta">Carpeta</label><input type="text" id="fCarpeta" list="dlCarpetas" placeholder="Carpeta azul" autocomplete="off"></div>
+    <div class="field"><label for="fEtiqueta">Etiqueta</label><input type="text" id="fEtiqueta" list="dlEtiquetas" placeholder="Taxi 2026" autocomplete="off"></div>
+  </div>
+  <div class="field"><label for="fUbic">Dónde está la carpeta</label><input type="text" id="fUbic" list="dlUbic" placeholder="Armario del despacho, 2º cajón" autocomplete="off"></div>
+  <div class="grid2">
+    <div class="field"><label for="fCaduca">Caduca (opcional)</label><input type="date" id="fCaduca"></div>
+    <div class="field"><label for="fAviso">Avisarme</label>
+      <select id="fAviso"><option value="7">7 días antes</option><option value="15">15 días antes</option><option value="30" selected>1 mes antes</option><option value="60">2 meses antes</option><option value="90">3 meses antes</option></select></div>
+  </div>
+  <div class="field"><label for="fNotas">Notas</label><textarea id="fNotas" placeholder="Número de póliza, a quién llamar para renovarlo…"></textarea></div>
+  <div class="error" id="fErr"></div>
+  <div class="actions">
+    <button class="submit" type="button" id="bSave">Guardar</button>
+    <a class="btn" id="bCal" href="#" target="_blank" rel="noopener" hidden>Poner aviso en Google Calendar</a>
+    <button class="btn bad" type="button" id="bDel" hidden>Eliminar</button>
+    <button class="btn" type="button" id="bClose">Cerrar</button>
+  </div>
+</dialog>
+
+<datalist id="dlCarpetas"></datalist><datalist id="dlEtiquetas"></datalist><datalist id="dlUbic"></datalist>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, setPersistence, browserLocalPersistence }
+  from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+import { initializeFirestore, persistentLocalCache, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAw9CSXwUEV7Ys4qFHz_CxgZ_9dvWxTIEI",
+  authDomain: "control-taxi-37844.firebaseapp.com",
+  projectId: "control-taxi-37844",
+  storageBucket: "control-taxi-37844.firebasestorage.app",
+  messagingSenderId: "275696850077",
+  appId: "1:275696850077:web:12f4ff85fc54751af3f074"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+setPersistence(auth, browserLocalPersistence);
+// Copia local en el móvil para que funcione también sin cobertura
+const db = initializeFirestore(app, { localCache: persistentLocalCache() });
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const p2 = n => String(n).padStart(2, '0');
+let papeles = [], vista = 'carpeta', unsub = null, editing = null, delArmed = false;
+
+function toast(m){ const t = $('toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 4000); }
+const col = () => collection(db, 'papeles', auth.currentUser.uid, 'docs');
+
+/* ---------- sesión ---------- */
+onAuthStateChanged(auth, u => {
+  if(u){
+    $('loginView').hidden = true; $('appView').hidden = false; $('fab').hidden = false;
+    if(unsub) unsub();
+    unsub = onSnapshot(col(), s => { papeles = s.docs.map(d => ({ id: d.id, ...d.data() })); render(); },
+      e => { $('list').innerHTML = '<p class="empty">No se pudieron cargar tus papeles (' + esc(e.code || e.message) + ').</p>'; });
+  }else{
+    if(unsub){ unsub(); unsub = null; }
+    papeles = [];
+    $('appView').hidden = true; $('fab').hidden = true; $('loginView').hidden = false;
+  }
+});
+$('lBtn').onclick = async () => {
+  const e = $('lEmail').value.trim(), p = $('lPass').value;
+  $('lError').textContent = '';
+  if(!e || !p){ $('lError').textContent = 'Escribe el correo y la contraseña.'; return; }
+  $('lBtn').disabled = true;
+  try{ await signInWithEmailAndPassword(auth, e, p); $('lPass').value = ''; }
+  catch(err){ $('lError').textContent = (err.code || '').includes('invalid-credential') ? 'Correo o contraseña incorrectos.' : 'Error: ' + (err.code || err.message); }
+  finally{ $('lBtn').disabled = false; }
+};
+$('outBtn').onclick = () => signOut(auth);
+
+/* ---------- caducidades ---------- */
+function diasHasta(f){
+  if(!f) return null;
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  return Math.round((new Date(f + 'T00:00') - hoy) / 86400000);
+}
+const fmt = f => f ? f.split('-').reverse().join('/') : '';
+function estadoCad(p){
+  const d = diasHasta(p.caduca);
+  if(d === null) return null;
+  const aviso = +p.aviso || 30;
+  if(d < 0) return { cls: 'bad', txt: 'Caducado', largo: 'Caducó hace ' + (-d) + (d === -1 ? ' día' : ' días') };
+  if(d <= aviso) return { cls: 'warn', txt: d === 0 ? 'Caduca hoy' : 'Caduca en ' + d + ' d', largo: d === 0 ? 'Caduca hoy' : 'Caduca en ' + d + (d === 1 ? ' día' : ' días') + ' (' + fmt(p.caduca) + ')' };
+  return { cls: '', txt: 'Hasta ' + fmt(p.caduca), largo: '' };
+}
+
+/* ---------- pintar ---------- */
+function coincide(p, q){
+  if(!q) return true;
+  const t = [p.nombre, p.categoria, p.carpeta, p.etiqueta, p.ubicacion, p.notas].join(' ').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return q.split(/\s+/).every(w => t.includes(w));
+}
+function card(p){
+  const c = estadoCad(p);
+  const meta = [
+    p.carpeta && 'Carpeta <b>' + esc(p.carpeta) + '</b>',
+    p.etiqueta && 'Etiqueta <b>' + esc(p.etiqueta) + '</b>',
+    p.ubicacion && esc(p.ubicacion)
+  ].filter(Boolean).join(' · ');
+  return '<button type="button" class="item" data-id="' + esc(p.id) + '"><span><div class="n">' + esc(p.nombre) + '</div>' +
+    (meta ? '<div class="m">' + meta + '</div>' : '') +
+    (c && c.largo ? '<div class="m">' + esc(c.largo) + '</div>' : '') + '</span>' +
+    (c ? '<span class="badge ' + c.cls + '">' + esc(c.txt) + '</span>' : '<span></span>') + '</button>';
+}
+function render(){
+  const q = $('q').value.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const lista = papeles.filter(p => coincide(p, q));
+
+  // Caducan pronto
+  const urg = lista.filter(p => { const c = estadoCad(p); return c && c.cls; })
+    .sort((a, b) => (a.caduca || '').localeCompare(b.caduca || ''));
+  $('alerts').innerHTML = urg.length ? '<h2>Caducan pronto</h2>' + urg.map(card).join('') : '';
+
+  // Datalists con lo ya usado
+  const uniq = k => [...new Set(papeles.map(p => p[k]).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+  $('dlCarpetas').innerHTML = uniq('carpeta').map(v => '<option value="' + esc(v) + '">').join('');
+  $('dlEtiquetas').innerHTML = uniq('etiqueta').map(v => '<option value="' + esc(v) + '">').join('');
+  $('dlUbic').innerHTML = uniq('ubicacion').map(v => '<option value="' + esc(v) + '">').join('');
+
+  const el = $('list');
+  if(!papeles.length){ el.innerHTML = '<p class="empty">Todavía no has guardado ningún papel. Pulsa «Añadir papel» para empezar.</p>'; return; }
+  if(!lista.length){ el.innerHTML = '<p class="empty">Nada coincide con la búsqueda.</p>'; return; }
+  const porNombre = (a, b) => (a.nombre || '').localeCompare(b.nombre || '', 'es');
+  if(vista === 'todo'){ el.innerHTML = lista.slice().sort(porNombre).map(card).join(''); return; }
+  const grupos = new Map();
+  for(const p of lista){
+    const k = p[vista] || (vista === 'carpeta' ? 'Sin carpeta' : 'Sin etiqueta');
+    if(!grupos.has(k)) grupos.set(k, []);
+    grupos.get(k).push(p);
+  }
+  const claves = [...grupos.keys()].sort((a, b) => a.startsWith('Sin ') - b.startsWith('Sin ') || a.localeCompare(b, 'es'));
+  el.innerHTML = claves.map(k => {
+    const items = grupos.get(k).sort(porNombre);
+    const ubics = [...new Set(items.map(p => p.ubicacion).filter(Boolean))];
+    const extra = vista === 'carpeta' && ubics.length === 1 ? ubics[0] : items.length + (items.length === 1 ? ' papel' : ' papeles');
+    return '<div class="grp"><h2>' + esc(k) + '<span>' + esc(extra) + '</span></h2>' + items.map(card).join('') + '</div>';
+  }).join('');
+}
+$('q').addEventListener('input', render);
+document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.seg button').forEach(x => x.classList.toggle('on', x === b));
+  vista = b.dataset.v; render();
+});
+document.addEventListener('click', e => {
+  const b = e.target.closest('.item'); if(!b) return;
+  const p = papeles.find(x => x.id === b.dataset.id); if(p) abrir(p);
+});
+
+/* ---------- ficha ---------- */
+const F = { nombre: 'fNombre', categoria: 'fCat', carpeta: 'fCarpeta', etiqueta: 'fEtiqueta', ubicacion: 'fUbic', caduca: 'fCaduca', aviso: 'fAviso', notas: 'fNotas' };
+function calLink(p){
+  if(!p.caduca) return '';
+  const d = new Date(p.caduca + 'T12:00'); d.setDate(d.getDate() - (+p.aviso || 30));
+  const d2 = new Date(d); d2.setDate(d2.getDate() + 1);
+  const f = x => x.getFullYear() + p2(x.getMonth() + 1) + p2(x.getDate());
+  const det = 'Caduca el ' + fmt(p.caduca) + '.' +
+    (p.carpeta ? '\nCarpeta: ' + p.carpeta : '') + (p.etiqueta ? '\nEtiqueta: ' + p.etiqueta : '') +
+    (p.ubicacion ? '\nDónde: ' + p.ubicacion : '') + (p.notas ? '\n' + p.notas : '');
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('Renovar: ' + p.nombre) +
+    '&dates=' + f(d) + '/' + f(d2) + '&details=' + encodeURIComponent(det);
+}
+function abrir(p){
+  editing = p || null; delArmed = false;
+  const v = p || { categoria: 'Personal', aviso: 30 };
+  for(const k in F) $(F[k]).value = v[k] == null ? '' : v[k];
+  if(!v.aviso) $('fAviso').value = '30';
+  $('sTitle').textContent = p ? 'Editar papel' : 'Nuevo papel';
+  $('bDel').hidden = !p; $('bDel').textContent = 'Eliminar';
+  $('bCal').hidden = !(p && p.caduca); if(p && p.caduca) $('bCal').href = calLink(p);
+  $('fErr').textContent = '';
+  $('sheet').showModal();
+}
+$('fab').onclick = () => abrir(null);
+$('bClose').onclick = () => $('sheet').close();
+$('bSave').onclick = async () => {
+  const d = {};
+  for(const k in F) d[k] = $(F[k]).value.trim();
+  d.aviso = +d.aviso || 30;
+  if(!d.nombre){ $('fErr').textContent = 'Escribe qué documento es.'; return; }
+  if(!d.carpeta && !d.ubicacion){ $('fErr').textContent = 'Pon al menos la carpeta o dónde está guardado.'; return; }
+  $('bSave').disabled = true;
+  try{
+    // Sin esperar al servidor: se guarda al instante en el móvil y se sube en cuanto hay cobertura
+    if(editing) updateDoc(doc(col(), editing.id), { ...d, actualizado: serverTimestamp() }).catch(e => toast('Error al guardar: ' + (e.code || e.message)));
+    else addDoc(col(), { ...d, creado: serverTimestamp() }).catch(e => toast('Error al guardar: ' + (e.code || e.message)));
+    $('sheet').close();
+    toast(d.caduca ? 'Guardado. Si quieres el aviso en tu calendario, ábrelo y pulsa «Poner aviso».' : 'Guardado.');
+  }finally{ $('bSave').disabled = false; }
+};
+$('bDel').onclick = async () => {
+  if(!editing) return;
+  if(!delArmed){ delArmed = true; $('bDel').textContent = 'Pulsa otra vez para eliminar'; return; }
+  deleteDoc(doc(col(), editing.id)).catch(e => toast('Error: ' + (e.code || e.message)));
+  $('sheet').close(); toast('Eliminado.');
+};
+
+/* ---------- exportar ---------- */
+$('expBtn').onclick = () => {
+  const datos = papeles.map(({ id, creado, actualizado, ...r }) => r);
+  const blob = new Blob([JSON.stringify({ exportado: new Date().toISOString(), papeles: datos }, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  const h = new Date(); a.download = 'mispapeles-' + h.getFullYear() + p2(h.getMonth() + 1) + p2(h.getDate()) + '.json';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
