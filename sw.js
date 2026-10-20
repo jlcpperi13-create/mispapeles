@@ -1,5 +1,5 @@
 // Service worker de MisPapeles. Al subir cambios, sube el número: v1 -> v2...
-const CACHE = 'mispapeles-v1';
+const CACHE = 'mispapeles-v3';
 const ARCHIVOS = ['./', './index.html', './manifest.json', './papeles-192.png', './papeles-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ARCHIVOS)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
