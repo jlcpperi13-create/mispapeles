@@ -227,6 +227,8 @@ dialog h2{margin:0 0 16px;font-size:1.2rem;font-weight:800}
   <button class="btn" type="button" id="mChange" hidden>🔑 Cambiar contraseña maestra</button>
   <button class="btn" type="button" id="mRecup" hidden>🧾 Nuevo código de recuperación</button>
   <button class="btn" type="button" id="mExport">⬇ Exportar copia de seguridad</button>
+  <button class="btn" type="button" id="mImport">⬆ Importar copia de seguridad</button>
+  <input type="file" id="impFile" accept=".json,application/json" hidden>
   <button class="btn" type="button" id="mOut">Salir de la cuenta</button>
   <button class="btn" type="button" id="mClose" style="justify-content:center;margin-top:6px">Cerrar</button>
 </dialog>
@@ -266,12 +268,12 @@ import { initializeFirestore, persistentLocalCache, collection, doc, addDoc, upd
   from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAw9CSXwUEV7Ys4qFHz_CxgZ_9dvWxTIEI",
-  authDomain: "control-taxi-37844.firebaseapp.com",
-  projectId: "control-taxi-37844",
-  storageBucket: "control-taxi-37844.firebasestorage.app",
-  messagingSenderId: "275696850077",
-  appId: "1:275696850077:web:12f4ff85fc54751af3f074"
+  apiKey: "AIzaSyClQOQGN5LwJVgH_MmLUQa5j9Ktwen3rKs",
+  authDomain: "mispapeles-7bc2f.firebaseapp.com",
+  projectId: "mispapeles-7bc2f",
+  storageBucket: "mispapeles-7bc2f.firebasestorage.app",
+  messagingSenderId: "232677680891",
+  appId: "1:232677680891:web:faa54399dae392f45fb25e"
 };
 const app = initializeApp(firebaseConfig, 'mispapeles');
 const auth = getAuth(app);
@@ -743,6 +745,42 @@ $('mExport').onclick = () => {
   const h = new Date(); a.download = 'mispapeles-' + h.getFullYear() + p2(h.getMonth() + 1) + p2(h.getDate()) + '.json';
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1500);
   $('menu').close(); toast('Copia descargada (la caja fuerte va cifrada)');
+};
+/* ---------- importar copia ---------- */
+$('mImport').onclick = () => { $('menu').close(); $('impFile').value = ''; $('impFile').click(); };
+$('impFile').onchange = async () => {
+  const f = $('impFile').files && $('impFile').files[0]; if(!f) return;
+  let j;
+  try{ j = JSON.parse(await f.text()); }catch(e){ toast('Ese archivo no es una copia de MisPapeles.'); return; }
+  // Copias nuevas: { app, datos }. Copias de la primera versión: { papeles } (solo papeles, sin id)
+  let items = Array.isArray(j.datos) ? j.datos : Array.isArray(j.papeles) ? j.papeles.map(x => ({ tipo: 'papel', ...x })) : null;
+  if(!items){ toast('Ese archivo no es una copia de MisPapeles.'); return; }
+  const actual = cajaConfig(), delArchivo = items.find(x => x.id === 'caja-config');
+  let avisoCaja = '';
+  if(delArchivo && actual && actual.salt !== delArchivo.salt){
+    // Ya hay otra caja fuerte en esta cuenta: no se mezcla, se queda la actual
+    items = items.filter(x => x.id !== 'caja-config' && x.tipo !== 'secreto');
+    avisoCaja = '\n\nOjo: ya tienes una caja fuerte distinta en esta cuenta. La caja de la copia NO se importará, para no estropear la tuya.';
+  }
+  // Evitar duplicados de copias antiguas sin id
+  const clave = x => [x.tipo, x.nombre, x.carpeta, x.url, x.etiqueta].map(v => String(v || '')).join('|');
+  const ya = new Set(todos.map(clave)), ids = new Set(todos.map(x => x.id));
+  const nuevos = items.filter(x => x.id ? !ids.has(x.id) : !ya.has(clave(x)));
+  const n = { papel: 0, enlace: 0, secreto: 0 };
+  nuevos.forEach(x => { if(n[x.tipo] != null) n[x.tipo]++; });
+  if(!nuevos.length){ toast('Todo lo de esa copia ya está en tu MisPapeles.'); return; }
+  const resumen = [n.papel && n.papel + ' papeles', n.enlace && n.enlace + ' enlaces', n.secreto && n.secreto + ' claves de la caja fuerte'].filter(Boolean).join(', ') || nuevos.length + ' elementos';
+  if(!confirm('Copia del ' + (j.exportado ? new Date(j.exportado).toLocaleDateString('es-ES') : 'archivo') + '.\n\nSe añadirán: ' + resumen + '.\nLo que ya tienes no se borra ni se cambia.' + avisoCaja)) return;
+  try{
+    for(let i = 0; i < nuevos.length; i += 400){
+      const b = writeBatch(db);
+      nuevos.slice(i, i + 400).forEach(({ id, creado, actualizado, ...r }) => {
+        b.set(id ? doc(col(), id) : doc(col()), { ...r, importado: serverTimestamp() });
+      });
+      await b.commit();
+    }
+    toast('Copia importada: ' + resumen + '.');
+  }catch(e){ toast('Error al importar: ' + (e.code || e.message)); }
 };
 $('mChange').onclick = () => { $('menu').close(); ['cOld', 'cNew', 'cNew2'].forEach(i => $(i).value = ''); $('cErr').textContent = ''; $('chg').showModal(); };
 $('cClose').onclick = () => $('chg').close();
